@@ -71,3 +71,28 @@ def process_csv_files(raw_data_dir):
     # Concatenate all DataFrames
     concatenated_df = pd.concat(dataframes, ignore_index=True)
     return concatenated_df, complete_metadata
+
+def save_csv_file(df, processed_data_path, complete_metadata):
+    # Save the DataFrame to a temporary CSV file
+    temp_file_path = processed_data_path.replace('.csv', '_temp.csv')
+    df.to_csv(temp_file_path, sep=';', index=False, encoding='ISO-8859-1')
+
+    # Write the final file with metadata at the top
+    with open(processed_data_path, 'w', encoding='ISO-8859-1') as final_file:
+        # Write the metadata
+        for line in complete_metadata:
+            final_file.write(line + '\n')
+        
+        # Copy the contents of the temporary file (formatted data) into the final file
+        with open(temp_file_path, 'r', encoding='ISO-8859-1') as temp_file:
+            for line in temp_file:
+                final_file.write(line)
+    
+    # Remove the temporary file
+    os.remove(temp_file_path)
+    
+    print(f"Formatted file with metadata saved at: {processed_data_path}")
+
+# Processing execution
+concatenated_df, complete_metadata = process_csv_files(RAW_DATA_DIR)
+save_csv_file(concatenated_df, PROCESSED_DATA_PATH, complete_metadata)
