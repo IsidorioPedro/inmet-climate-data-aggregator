@@ -51,3 +51,23 @@ def format_data(df):
         df['Hora UTC'] = df['Hora UTC'].apply(lambda x: f"{x.replace(':', '')} UTC")
 
     return df
+
+def process_csv_files(raw_data_dir):
+    dataframes = []
+    complete_metadata = None  # Variable to store the metadata
+
+    for file_name in os.listdir(raw_data_dir):
+        if file_name.endswith('.CSV'):
+            file_path = os.path.join(raw_data_dir, file_name)
+            df, metadata = load_csv_file(file_path)
+            if df is not None:
+                formatted_df = format_data(df)
+                dataframes.append(formatted_df)
+                
+                # Save the metadata only once (assuming it is the same for all files)
+                if complete_metadata is None:
+                    complete_metadata = metadata
+
+    # Concatenate all DataFrames
+    concatenated_df = pd.concat(dataframes, ignore_index=True)
+    return concatenated_df, complete_metadata
